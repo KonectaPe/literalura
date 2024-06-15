@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 public class Principal {
     private Integer opcion = -1;
+    private Boolean isRunApp = true;
     private final Scanner sc = new Scanner(System.in);
     private final ConsumoApi consumoApi = new ConsumoApi();
     private final ConvierteDatos conversor = new ConvierteDatos();
@@ -30,7 +31,7 @@ public class Principal {
         String menu = """
                 --------------------------------------------
                 \nElija la opción a través de un número:
-                1 - Busqueda de libro por titulo.
+                1 - Búsqueda de libro por titulo.
                 2 - Listar todos los libros registrados.
                 3 - Listar todos los autores registrados.
                 4 - Listar autores vivos en un determinado año.
@@ -39,8 +40,9 @@ public class Principal {
                 0 - Salir.
                 --------------------------------------------
                 """;
-        try {
-            while (opcion != 0) {
+
+        while (isRunApp) {
+            try {
                 System.out.println(menu);
                 opcion = sc.nextInt();
                 sc.nextLine();
@@ -64,14 +66,16 @@ public class Principal {
                         obtenerEstadisticas();
                         break;
                     case 0:
+                        isRunApp = false;
                         System.out.println("Saliendo de la aplicación...");
                         break;
                     default:
                         System.out.println("Opcion inválida.");
                 }
+            } catch (InputMismatchException e) {
+                sc.nextLine();
+                System.out.println("Ingrese un número de opción válida: " + e.getMessage());
             }
-        } catch (InputMismatchException e) {
-            System.out.println("Ingrese un número de opción válida: " + e.getMessage());
         }
     }
 
@@ -87,9 +91,6 @@ public class Principal {
         if (!datosResultado.datosDeLibro().isEmpty()) {
             DatosLibro datosLibro = datosResultado.datosDeLibro().getFirst();
             DatosAutor datosAutor = datosLibro.datosDeAutor().getFirst();
-            if (datosAutor.fechaDeFallecimiento() == null && datosAutor.fechaDeNacimiento() == null) {
-                datosAutor = datosLibro.datosDeAutor().get(1);
-            }
             var tituloDeLibro = libroRepository.findLibroByTitulo(datosLibro.titulo());
             if (tituloDeLibro != null) {
                 System.out.println("No se puede registrar el mismo libro más de una vez.");
@@ -206,6 +207,4 @@ public class Principal {
             System.out.println("Opción no válida, intentelo de nuevo.");
         }
     }
-
-
 }
